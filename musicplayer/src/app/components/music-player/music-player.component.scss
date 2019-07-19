@@ -1,0 +1,19 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items:center;
+  background: #3f51b5;
+  height: 150px;
+}
+.button-wrapper, .progress-wrapper {
+  display: flex;
+  width: 500px;
+  justify-content: space-between;
+  color:#fff;
+  align-items:center;
+}
+
+mat-progress-bar{
+  width: 400px;
+}

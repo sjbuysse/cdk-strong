@@ -1,0 +1,33 @@
+.sidenav {
+  position: absolute;
+  top: 0;
+  bottom: 150px;
+  left: 0;
+  right: 0;
+}
+
+.mat-sidenav-content {
+  display: flex;
+  width: 100%;
+}
+
+.menu-open-bar {
+  background: #fff;
+  border-right: 1px solid #0000001f;
+}
+
+.content {
+  width: 100%;
+}
+
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+sb-music-player {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+}

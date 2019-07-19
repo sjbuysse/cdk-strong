@@ -1,0 +1,29 @@
+table {
+  width: 100%;
+}
+
+.drag-placeholder {
+  height: 48px;
+  background: #f1f1f1;
+  width: 100%;
+  border: 1px dotted #ccc;
+}
+
+.play-action, .more-action {
+  opacity:0;
+}
+
+tr {
+  cursor: move;
+}
+tr:hover {
+  .play-action, .more-action {
+    opacity:1;
+  }
+}
+.drag-preview {
+  background: #3f51b5;
+  color: #fff;
+  border-radius: 10px;
+  padding: 5px 10px;
+}
