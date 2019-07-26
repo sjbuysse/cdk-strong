@@ -3,17 +3,21 @@ import {SpotifyService} from '../../services/spotify.service';
 import {ReplaySubject} from 'rxjs';
 import {debounceTime, switchMap} from 'rxjs/operators';
 import {MatSnackBar} from '@angular/material';
+import {MusicPlayerService} from '../../services/music-player.service';
+import TrackObjectFull = SpotifyApi.TrackObjectFull;
 
 @Component({
   selector: 'sb-search',
   template: `
     <mat-toolbar color="primary">
       <mat-form-field>
-        <input (input)="term$.next($event?.target?.value)" matInput type="text" placeholder="Search for songs" autocomplete="off">
+        <input (input)="term$.next($event?.target?.value)" matInput type="text" placeholder="Search for songs"
+               autocomplete="off">
         <mat-icon>search</mat-icon>
       </mat-form-field>
     </mat-toolbar>
     <sb-track-list
+      [currentlyPlaying]="track$|async"
       [tracks]="(results$|async)?.tracks?.items"
       [searchMode]="true"
       [playlists]="playlists$|async"
@@ -31,13 +35,18 @@ export class SearchComponent {
     debounceTime(200),
     switchMap(v => this.spotifyService.search(v))
   )
+  track$ = this.musicPlayerService.currentTrack$;
 
-  constructor(private spotifyService: SpotifyService, private matSnackBar: MatSnackBar) {
-
+  constructor(
+    private spotifyService: SpotifyService,
+    private matSnackBar: MatSnackBar,
+    private musicPlayerService: MusicPlayerService) {
+    this.results$.subscribe(resp => this.musicPlayerService.setTrackList(resp.tracks.items));
   }
 
-  onPlay(e: any): void {
-
+  onPlay(track: TrackObjectFull): void {
+    this.musicPlayerService.setTrack(track);
+    this.musicPlayerService.play();
   }
 
   addToPlaylist({uri, playlistId}): void {

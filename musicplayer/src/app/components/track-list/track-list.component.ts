@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
 import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
@@ -18,9 +18,10 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
       <ng-container matColumnDef="play">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element">
-          <button mat-mini-fab class="play-action" (click)="playTrack.emit(element)">
+          <button *ngIf="currentlyPlaying?.id !== element?.id"mat-mini-fab class="play-action" (click)="playTrack.emit(element)">
             <mat-icon>play_arrow</mat-icon>
           </button>
+          <mat-icon *ngIf="currentlyPlaying?.id === element?.id">volume_up</mat-icon>
         </td>
       </ng-container>
 
@@ -84,10 +85,11 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
     </table>
     <div class="no-results" *ngIf="tracks?.length === 0 || tracks === null">No results found</div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  // no onpush, doesnt work with the drag and drop from cdk
   styleUrls: ['./track-list.component.scss']
 })
 export class TrackListComponent {
+  @Input() currentlyPlaying: TrackObjectFull;
   @Input() playlists: PlaylistObjectSimplified[];
   @Input() searchMode: boolean;
   @Input() tracks: TrackObjectFull[];
@@ -95,7 +97,7 @@ export class TrackListComponent {
   @Output() playTrack = new EventEmitter<TrackObjectFull>();
   @Output() addToPlaylist = new EventEmitter<{ playlistId: string, uri: string }>();
   @Output() removeFromPlaylist = new EventEmitter<string>();
-  @Output() reorder = new EventEmitter<{currentIndex: number, newIndex: number, uri: string}>();
+  @Output() reorder = new EventEmitter<{ currentIndex: number, newIndex: number, uri: string }>();
   columnsToDisplay = ['play', 'artist', 'title', 'album', 'options'];
 
   getArtists(track: TrackObjectFull): string {

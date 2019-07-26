@@ -30,7 +30,6 @@ import {map} from 'rxjs/operators';
           <mat-icon>skip_next</mat-icon>
         </button>
       </div>
-
       <div class="progress-wrapper" *ngIf="currentTrack">
         <span>{{timeStr}}</span>
         <mat-progress-bar color="accent" mode="determinate" [value]="progress$|async"></mat-progress-bar>
@@ -40,7 +39,10 @@ import {map} from 'rxjs/operators';
     <div class="right">
       <ng-container *ngIf="currentTrack">
         <mat-icon>speaker</mat-icon>
-        <mat-slider></mat-slider>
+        <mat-slider
+          [value]="volume" [min]="0" [max]="1" [step]="0.1"
+          (valueChange)="updateVolume.emit($event)"
+        ></mat-slider>
       </ng-container>
     </div>
 
@@ -54,6 +56,7 @@ export class MusicPlayerComponent {
   duration$ = new ReplaySubject<number>(1);
   @Input() currentTrack: TrackObjectFull;
   @Input() playing: boolean;
+  @Input() volume: number;
 
   @Input() set time(v: number) {
     const date = new Date(null);
@@ -73,6 +76,7 @@ export class MusicPlayerComponent {
   @Output() pauseStart = new EventEmitter();
   @Output() next = new EventEmitter();
   @Output() previous = new EventEmitter();
+  @Output() updateVolume = new EventEmitter<number>();
 
   progress$ = combineLatest(this.time$, this.duration$).pipe(
     map(([time, duration]) => {

@@ -1,8 +1,8 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {map, mapTo, mergeMap, switchMap} from 'rxjs/operators';
 import {SpotifyService} from '../../services/spotify.service';
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, Subject} from 'rxjs';
 import {MatSnackBar} from '@angular/material';
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
 import {MusicPlayerService} from '../../services/music-player.service';
@@ -17,6 +17,7 @@ import {MusicPlayerService} from '../../services/music-player.service';
         <span>Playlist: {{playlist?.name}}</span>
       </mat-toolbar>
       <sb-track-list
+        [currentlyPlaying]="track$|async"
         [tracks]="tracks$|async"
         [searchMode]="false"
         [playlists]="playlists$|async"
@@ -28,7 +29,7 @@ import {MusicPlayerService} from '../../services/music-player.service';
   `,
   styleUrls: ['./playlist.component.scss']
 })
-export class PlaylistComponent {
+export class PlaylistComponent implements OnDestroy {
   playlistId$ = this.activatedRoute.params.pipe(map(v => v.id));
   trigger$ = new BehaviorSubject(true);
   playlist$ = this.playlistId$.pipe(
@@ -38,11 +39,14 @@ export class PlaylistComponent {
   tracks$ = this.playlist$.pipe(
     map(playlist => playlist.tracks.items.map(item => item.track))
   );
+  track$ = this.musicPlayerService.currentTrack$;
+  destroy$ = new Subject();
 
   constructor(private activatedRoute: ActivatedRoute,
               private spotifyService: SpotifyService,
               private musicPlayerService: MusicPlayerService,
               private matSnackBar: MatSnackBar) {
+    this.tracks$.subscribe(tracks => this.musicPlayerService.setTrackList(tracks));
   }
 
   onPlay(track: TrackObjectFull): void {
@@ -53,8 +57,12 @@ export class PlaylistComponent {
   removeFromPlaylist(uri: string): void {
     this.spotifyService.removeFromPlaylist(uri, this.activatedRoute.snapshot.params.id).subscribe(resp => {
       this.trigger$.next(true);
-      this.matSnackBar.open('Successfully removed track from playlist!')
+      this.matSnackBar.open('Successfully removed track from playlist!');
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
   }
 
   reorderTracks({currentIndex, newIndex}): void {

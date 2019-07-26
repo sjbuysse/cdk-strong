@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import {SpotifyService} from './services/spotify.service';
 import {Router} from '@angular/router';
-import {filter, map, switchMap} from 'rxjs/operators';
 import {MusicPlayerService} from './services/music-player.service';
 
 @Component({
@@ -30,9 +29,13 @@ import {MusicPlayerService} from './services/music-player.service';
       </mat-sidenav-container>
       <sb-music-player
         [playing]="playing$|async"
+        [volume]="volume$|async"
         [time]="time$|async"
         [duration]="duration$|async"
         [currentTrack]="currentTrack$|async"
+        (updateVolume)="updateVolume($event)"
+        (next)="onNext()"
+        (previous)="onPrevious()"
         (playStart)="playStart()"
         (pauseStart)="pauseStart()"></sb-music-player>
     </ng-container>
@@ -53,6 +56,7 @@ export class AppComponent {
   currentTrack$ = this.musicPlayerService.currentTrack$;
   time$ = this.musicPlayerService.time$;
   duration$ = this.musicPlayerService.duration$;
+  volume$ = this.musicPlayerService.volume$;
 
   constructor(
     private spotifyService: SpotifyService,
@@ -76,5 +80,17 @@ export class AppComponent {
 
   pauseStart(): void {
     this.musicPlayerService.pause();
+  }
+
+  updateVolume(value: number): void {
+    this.musicPlayerService.updateVolume(value);
+  }
+
+  onNext(): void {
+    this.musicPlayerService.next();
+  }
+
+  onPrevious(): void {
+    this.musicPlayerService.previous();
   }
 }
