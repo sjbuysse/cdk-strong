@@ -5,7 +5,8 @@ import { SpotifyService } from '../../services/spotify.service';
   selector: 'sb-unauthorized',
   template: `
     <mat-toolbar color="primary">
-      <span>You are unauthorized</span>
+      <mat-icon>perm_identity</mat-icon>
+      <span>You are unauthorized!</span>
     </mat-toolbar>
     <div class="unauthorized-wrapper">
       <button mat-flat-button color="accent" (click)="authorize()">Authorize</button>

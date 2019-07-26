@@ -1,18 +1,23 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { CurrentQueueComponent } from './containers/current-queue/current-queue.component';
-import { PlaylistComponent } from './containers/playlist/playlist.component';
-import { CreatePlaylistComponent } from './containers/create-playlist/create-playlist.component';
-import { UnauthorizedComponent } from './containers/unauthorized/unauthorized.component';
+import {NgModule} from '@angular/core';
+import {RouterModule, Routes} from '@angular/router';
+import {PlaylistComponent} from './containers/playlist/playlist.component';
+import {CreatePlaylistComponent} from './containers/create-playlist/create-playlist.component';
+import {UnauthorizedComponent} from './containers/unauthorized/unauthorized.component';
+import {SearchComponent} from './containers/search/search.component';
 
 
 const routes: Routes = [
   {
     path: '',
-    component: CurrentQueueComponent
+    redirectTo: 'search',
+    pathMatch: 'full'
   }, {
     path: 'unauthorized',
     component: UnauthorizedComponent
+  },
+  {
+    path: 'search',
+    component: SearchComponent
   },
   {
     path: 'playlists/create',

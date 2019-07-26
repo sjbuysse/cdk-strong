@@ -1,13 +1,17 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, NEVER, Observable, ReplaySubject} from 'rxjs';
 import * as SpotifyWebApi from 'spotify-web-api-js';
-import { fromPromise } from 'rxjs/internal-compatibility';
-import { Device } from '../types/device.type';
-import { map, switchMap } from 'rxjs/operators';
+import {fromPromise} from 'rxjs/internal-compatibility';
+import {catchError, filter, map, mergeMap, shareReplay, switchMap, tap} from 'rxjs/operators';
 import * as settings from '../../../spotify-credentials.json';
-import PlaylistTrackObject = SpotifyApi.PlaylistTrackObject;
 import SinglePlaylistResponse = SpotifyApi.SinglePlaylistResponse;
 import CurrentlyPlayingResponse = SpotifyApi.CurrentlyPlayingResponse;
+import CreatePlaylistResponse = SpotifyApi.CreatePlaylistResponse;
+import TrackSearchResponse = SpotifyApi.TrackSearchResponse;
+import {Router} from '@angular/router';
+import {MatSnackBar} from '@angular/material';
+import AddTracksToPlaylistResponse = SpotifyApi.AddTracksToPlaylistResponse;
+import TrackObjectFull = SpotifyApi.TrackObjectFull;
 
 @Injectable({
   providedIn: 'root'
@@ -43,8 +47,16 @@ export class SpotifyService {
   );
 
   me$ = new ReplaySubject<SpotifyApi.CurrentUsersProfileResponse>(1);
+  refreshTrigger$ = new BehaviorSubject(true);
 
-  constructor() {
+  playlists$ = this.isAuthorized().pipe(
+    filter(v => !!v),
+    mergeMap(() => this.refreshTrigger$),
+    switchMap(() => this.getPlayLists()),
+    shareReplay(1)
+  );
+
+  constructor(private router: Router, private matSnackBar: MatSnackBar) {
     const accessToken = window.location.hash.split('=')[1];
     if (accessToken) {
       window.localStorage.setItem(this.spotifyTokenKey, accessToken);
@@ -54,7 +66,7 @@ export class SpotifyService {
     if (this.spotifyToken$.getValue()) {
       this.spotify = new (SpotifyWebApi as any)();
       this.spotify.setAccessToken(this.spotifyToken$.getValue());
-      fromPromise(this.spotify.getMe()).subscribe((me: SpotifyApi.CurrentUsersProfileResponse) => {
+      this.handleRequest(this.spotify.getMe()).subscribe((me: SpotifyApi.CurrentUsersProfileResponse) => {
         this.me$.next(me);
       });
 
@@ -76,41 +88,62 @@ export class SpotifyService {
     );
   }
 
-  getDevices(): Observable<Device[]> {
-    return fromPromise(this.spotify.getMyDevices()).pipe(
-      map((v: any) => v.devices)
-    );
-  }
-
-  play(trackId: string): any {
-    console.log('play');
-    this.spotify.play();
-    // return this.getDevices().pipe(switchMap(devices => this.spotify.transferMyPlayback([devices[0].id]))).subscribe(console.log);
-  }
-
-  getPlayLists(): Observable<SpotifyApi.PlaylistObjectSimplified[]> {
+  private getPlayLists(): Observable<SpotifyApi.PlaylistObjectSimplified[]> {
     return this.me$.pipe(
-      switchMap(me => fromPromise(this.spotify.getUserPlaylists(me.id))),
+      switchMap(me => this.handleRequest(this.spotify.getUserPlaylists(me.id))),
       map((resp: SpotifyApi.ListOfUsersPlaylistsResponse) => resp.items)
     );
   }
 
-  getTracksFromList(id: string): Observable<PlaylistTrackObject[]> {
-    return fromPromise(this.spotify.getPlaylistTracks(id)).pipe(
-      map((resp: SpotifyApi.PlaylistTrackResponse) => resp.items)
-    );
-  }
-
   getPlayList(id: string): Observable<SinglePlaylistResponse> {
-    return fromPromise(this.spotify.getPlaylist(id));
+    return this.handleRequest(this.spotify.getPlaylist(id));
   }
 
   getMyCurrentPlayingTrack(): Observable<CurrentlyPlayingResponse> {
-    return fromPromise(this.spotify.getMyCurrentPlayingTrack());
+    return this.handleRequest(this.spotify.getMyCurrentPlayingTrack());
   }
 
   logout(): void {
     window.localStorage.removeItem(this.spotifyTokenKey);
     this.spotifyToken$.next(null);
+  }
+
+  createPlaylist(body: { name: string, description: string, public: boolean }): Observable<CreatePlaylistResponse> {
+    return this.me$.pipe(
+      switchMap(me => this.handleRequest(this.spotify.createPlaylist(me.id, body)) as Observable<CreatePlaylistResponse>),
+      tap(() => this.refreshTrigger$.next(true)) // reload
+    );
+  }
+
+  search(term: string): Observable<TrackSearchResponse> {
+    return this.handleRequest(this.spotify.searchTracks(term));
+  }
+
+  addToPlaylist(uri: any, playlistId: any): Observable<AddTracksToPlaylistResponse> {
+    return (this.handleRequest(this.spotify.addTracksToPlaylist(playlistId, [uri])) as Observable<AddTracksToPlaylistResponse>)
+      .pipe(
+        tap(() => this.refreshTrigger$.next(true)) // reload
+      );
+  }
+
+  removeFromPlaylist(uri: string, id: any) {
+    return this.handleRequest(this.spotify.removeTracksFromPlaylist(id, [uri]))
+      .pipe(
+        tap(() => this.refreshTrigger$.next(true)) // reload
+      );
+  }
+
+  reorderTracks(currentIndex: number, newIndex: number, playlistId: string) {
+    return this.handleRequest(this.spotify.reorderTracksInPlaylist(playlistId, currentIndex, newIndex));
+  }
+
+  private handleRequest<T>(promise: Promise<T>): Observable<T> {
+    return fromPromise(promise).pipe(catchError(e => {
+      if (e.status === 401) {
+        this.matSnackBar.open('You are unauthorized');
+        this.router.navigate(['/unauthorized']);
+      }
+      return NEVER;
+    }));
   }
 }

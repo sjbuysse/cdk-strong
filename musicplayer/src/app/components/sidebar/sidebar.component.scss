@@ -1,4 +1,8 @@
-.top {
+mat-card-header {
+  justify-content: space-between;
+}
+:host {
+  width: 300px;
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
 }

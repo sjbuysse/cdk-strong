@@ -1,25 +1,24 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Playlist } from '../../types/playlist.type';
-import PlaylistTrackObject = SpotifyApi.PlaylistTrackObject;
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
+import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
 
 @Component({
   selector: 'sb-track-list',
   template: `
 
     <table mat-table
-           [cdkDropListData]="dataSource"
+           [cdkDropListData]="tracks"
            [dataSource]="tracks" cdkDropList (cdkDropListDropped)="drop($event)">
       <ng-container matColumnDef="artist">
         <th mat-header-cell *matHeaderCellDef>Artist</th>
-        <td mat-cell *matCellDef="let element">{{getArtists(element?.track)}}</td>
+        <td mat-cell *matCellDef="let element">{{getArtists(element)}}</td>
       </ng-container>
 
       <ng-container matColumnDef="play">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element">
-          <button mat-mini-fab class="play-action" (click)="playTrack.emit(element?.track?.id)">
+          <button mat-mini-fab class="play-action" (click)="playTrack.emit(element)">
             <mat-icon>play_arrow</mat-icon>
           </button>
         </td>
@@ -27,24 +26,28 @@ import TrackObjectFull = SpotifyApi.TrackObjectFull;
 
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Title</th>
-        <td mat-cell *matCellDef="let element"> {{element?.track?.name}}</td>
+        <td mat-cell *matCellDef="let element"> {{element?.name}}</td>
       </ng-container>
 
       <ng-container matColumnDef="album">
         <th mat-header-cell *matHeaderCellDef>Album</th>
-        <td mat-cell *matCellDef="let element"> {{element?.track?.album?.name}}</td>
+        <td mat-cell *matCellDef="let element"> {{element?.album?.name}}</td>
       </ng-container>
       <ng-container matColumnDef="options">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element">
           <mat-menu #trackMenu="matMenu">
-            <button mat-menu-item>
-              <mat-icon>remove_from_queue</mat-icon>
-              <span>Remove from queue</span>
-            </button>
-            <button mat-menu-item [matMenuTriggerFor]="playlistsMenu">
+            <button *ngIf="searchMode" mat-menu-item [matMenuTriggerFor]="playlistsMenu">
               <mat-icon>add_to_queue</mat-icon>
               <span>Add to playlist</span>
+            </button>
+            <button mat-menu-item (click)="openInSpotify(element.uri)">
+              <mat-icon>play_circle_filled</mat-icon>
+              <span>Open in spotify</span>
+            </button>
+            <button *ngIf="!searchMode" mat-menu-item (click)="removeFromPlaylist.emit(element.uri)">
+              <mat-icon>remove_from_queue</mat-icon>
+              <span>Remove from playlist</span>
             </button>
             <button mat-menu-item>
               <mat-icon>share</mat-icon>
@@ -53,9 +56,10 @@ import TrackObjectFull = SpotifyApi.TrackObjectFull;
           </mat-menu>
           <mat-menu #playlistsMenu="matMenu">
             <ng-container *ngFor="let playlist of playlists">
-              <button mat-menu-item>
+              <button mat-menu-item (click)="addToPlaylist.emit({playlistId: playlist?.id, uri: element.uri})">
                 <mat-icon>add</mat-icon>
-                <span>{{playlist?.name}}t</span>
+                <span>{{playlist?.name}}</span>
+                <span> ({{playlist?.tracks?.total}})</span>
               </button>
             </ng-container>
           </mat-menu>
@@ -67,18 +71,31 @@ import TrackObjectFull = SpotifyApi.TrackObjectFull;
         </td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
-      <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" cdkDrag [cdkDragData]="row">
-        <div *cdkDragPreview class="drag-preview">{{getArtists(row?.track)}} - {{row?.track?.name}}</div>
-        <td colspan="5" class="drag-placeholder" *cdkDragPlaceholder></td>
-      </tr>
+      <ng-container *ngIf="!searchMode; else reorderingDisabled">
+        <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" cdkDrag [cdkDragData]="row">
+          <div *cdkDragPreview class="drag-preview">{{getArtists(row)}} - {{row?.name}}</div>
+          <td colspan="5" class="drag-placeholder" *cdkDragPlaceholder></td>
+        </tr>
+      </ng-container>
+      <ng-template #reorderingDisabled>
+        <tr mat-row *matRowDef="let row; columns: columnsToDisplay;">
+        </tr>
+      </ng-template>
     </table>
+    <div class="no-results" *ngIf="tracks?.length === 0 || tracks === null">No results found</div>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./track-list.component.scss']
 })
-export class TrackListComponent implements OnInit {
-  @Input() playlists: Playlist[];
-  @Input() tracks: PlaylistTrackObject[];
-  @Output() playTrack = new EventEmitter<string>();
+export class TrackListComponent {
+  @Input() playlists: PlaylistObjectSimplified[];
+  @Input() searchMode: boolean;
+  @Input() tracks: TrackObjectFull[];
+  @Input() reorderingEnabled: boolean;
+  @Output() playTrack = new EventEmitter<TrackObjectFull>();
+  @Output() addToPlaylist = new EventEmitter<{ playlistId: string, uri: string }>();
+  @Output() removeFromPlaylist = new EventEmitter<string>();
+  @Output() reorder = new EventEmitter<{currentIndex: number, newIndex: number, uri: string}>();
   columnsToDisplay = ['play', 'artist', 'title', 'album', 'options'];
 
   getArtists(track: TrackObjectFull): string {
@@ -86,10 +103,10 @@ export class TrackListComponent implements OnInit {
   }
 
   drop(event: CdkDragDrop<string[]>): void {
-
+    this.reorder.emit({currentIndex: event.previousIndex, newIndex: event.currentIndex, uri: event.item.data.uri});
   }
 
-  ngOnInit() {
+  openInSpotify(uri: string): void {
+    window.open(uri);
   }
-
 }
