@@ -8,7 +8,7 @@ import {MusicPlayerService} from './services/music-player.service';
   template: `
     <ng-container *ngIf="isAuthorized$|async; else unauthorized">
       <mat-sidenav-container>
-        <mat-sidenav mode="side" [opened]="true">
+        <mat-sidenav mode="side" [opened]="menuOpen">
           <sb-sidebar
             [playlists]="playlists$|async"
             [me]="me$|async"
@@ -17,7 +17,10 @@ import {MusicPlayerService} from './services/music-player.service';
           ></sb-sidebar>
         </mat-sidenav>
         <mat-sidenav-content>
-          <sb-sidebar-closed [show]="false"></sb-sidebar-closed>
+          <sb-sidebar-closed
+            [show]="!menuOpen"
+            (openMenu)="onOpenMenu()"
+          ></sb-sidebar-closed>
           <div class="content">
             <router-outlet></router-outlet>
           </div>
@@ -91,6 +94,10 @@ export class AppComponent {
   }
 
   onCloseMenu(): void {
-    // implement
+    this.menuOpen = false;
+  }
+
+  onOpenMenu(): void {
+    this.menuOpen = true;
   }
 }
