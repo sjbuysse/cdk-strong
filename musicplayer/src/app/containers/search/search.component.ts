@@ -10,11 +10,9 @@ import TrackObjectFull = SpotifyApi.TrackObjectFull;
   selector: 'sb-search',
   template: `
     <mat-toolbar color="primary">
-      <mat-form-field>
-        <input (input)="term$.next($event?.target?.value)" matInput type="text" placeholder="Search for songs"
-               autocomplete="off">
-        <mat-icon>search</mat-icon>
-      </mat-form-field>
+      <input (input)="term$.next($event?.target?.value)" type="text" placeholder="Search for songs"
+             autocomplete="off">
+      <mat-icon>search</mat-icon>
     </mat-toolbar>
     <sb-track-list
       [currentlyPlaying]="track$|async"

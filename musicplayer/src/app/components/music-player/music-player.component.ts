@@ -6,45 +6,6 @@ import {map} from 'rxjs/operators';
 @Component({
   selector: 'sb-music-player',
   template: `
-    <div class="left">
-      <mat-card *ngIf="currentTrack">
-        <mat-card-header>
-          <img [attr.src]="getImage(currentTrack)" mat-card-avatar alt="">
-          <mat-card-title>{{currentTrack?.name}}</mat-card-title>
-          <mat-card-subtitle>{{getArtists(currentTrack)}}</mat-card-subtitle>
-        </mat-card-header>
-      </mat-card>
-    </div>
-    <div class="middle">
-      <div class="button-wrapper">
-        <button mat-icon-button [disabled]="!currentTrack" (click)="previous.emit()">
-          <mat-icon>skip_previous</mat-icon>
-        </button>
-        <button mat-icon-button *ngIf="!playing" (click)="playStart.emit()" [disabled]="!currentTrack">
-          <mat-icon>play_circle_filled</mat-icon>
-        </button>
-        <button mat-icon-button *ngIf="playing" (click)="pauseStart.emit()" [disabled]="!currentTrack">
-          <mat-icon>pause_circle_filled</mat-icon>
-        </button>
-        <button mat-icon-button [disabled]="!currentTrack" (click)="next.emit()">
-          <mat-icon>skip_next</mat-icon>
-        </button>
-      </div>
-      <div class="progress-wrapper" *ngIf="currentTrack">
-        <span>{{timeStr}}</span>
-        <mat-progress-bar color="accent" mode="determinate" [value]="progress$|async"></mat-progress-bar>
-        <span>{{durationStr}}</span>
-      </div>
-    </div>
-    <div class="right">
-      <ng-container *ngIf="currentTrack">
-        <mat-icon>speaker</mat-icon>
-        <mat-slider
-          [value]="volume" [min]="0" [max]="1" [step]="0.1"
-          (valueChange)="updateVolume.emit($event)"
-        ></mat-slider>
-      </ng-container>
-    </div>
 
   `,
   styleUrls: ['./music-player.component.scss']

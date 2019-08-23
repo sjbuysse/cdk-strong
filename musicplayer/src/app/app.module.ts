@@ -28,6 +28,7 @@ import {MusicPlayerComponent} from './components/music-player/music-player.compo
 import {UnauthorizedComponent} from './containers/unauthorized/unauthorized.component';
 import {SearchComponent} from './containers/search/search.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { SidebarClosedComponent } from './components/sidebar-closed/sidebar-closed.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
     CreatePlaylistComponent,
     MusicPlayerComponent,
     UnauthorizedComponent,
-    SearchComponent
+    SearchComponent,
+    SidebarClosedComponent
   ],
   imports: [
     BrowserAnimationsModule,

@@ -7,21 +7,17 @@ import {MusicPlayerService} from './services/music-player.service';
   selector: 'sb-root',
   template: `
     <ng-container *ngIf="isAuthorized$|async; else unauthorized">
-      <mat-sidenav-container class="sidenav">
-        <mat-sidenav mode="side" [opened]="menuOpen">
+      <mat-sidenav-container>
+        <mat-sidenav mode="side" [opened]="true">
           <sb-sidebar
             [playlists]="playlists$|async"
             [me]="me$|async"
-            (closeMenu)="menuOpen = false"
+            (closeMenu)="onCloseMenu()"
             (logout)="onLogout()"
           ></sb-sidebar>
         </mat-sidenav>
         <mat-sidenav-content>
-          <div class="menu-open-bar" *ngIf="!menuOpen">
-            <button mat-icon-button (click)="menuOpen =true">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-          </div>
+          <sb-sidebar-closed [show]="false"></sb-sidebar-closed>
           <div class="content">
             <router-outlet></router-outlet>
           </div>
@@ -92,5 +88,9 @@ export class AppComponent {
 
   onPrevious(): void {
     this.musicPlayerService.previous();
+  }
+
+  onCloseMenu(): void {
+    // implement
   }
 }
