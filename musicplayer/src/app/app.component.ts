@@ -7,22 +7,6 @@ import {MusicPlayerService} from './services/music-player.service';
   selector: 'sb-root',
   template: `
     <ng-container *ngIf="isAuthorized$|async; else unauthorized">
-      <mat-sidenav-container>
-        <mat-sidenav mode="side" [opened]="true">
-          <sb-sidebar
-            [playlists]="playlists$|async"
-            [me]="me$|async"
-            (closeMenu)="onCloseMenu()"
-            (logout)="onLogout()"
-          ></sb-sidebar>
-        </mat-sidenav>
-        <mat-sidenav-content>
-          <sb-sidebar-closed [show]="false"></sb-sidebar-closed>
-          <div class="content">
-            <router-outlet></router-outlet>
-          </div>
-        </mat-sidenav-content>
-      </mat-sidenav-container>
       <sb-music-player
         [playing]="playing$|async"
         [volume]="volume$|async"

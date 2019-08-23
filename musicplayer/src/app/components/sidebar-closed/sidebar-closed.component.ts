@@ -1,10 +1,10 @@
-import {Component, EventEmitter, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 @Component({
   selector: 'sb-sidebar-closed',
   template: `
     <div class="menu-open-bar" *ngIf="show">
-      <button mat-icon-button (click)="open.emit()">
+      <button mat-icon-button (click)="openMenu.emit()">
         <mat-icon>more_vert</mat-icon>
       </button>
     </div>
@@ -13,5 +13,5 @@ import {Component, EventEmitter, Input} from '@angular/core';
 })
 export class SidebarClosedComponent  {
   @Input() show: boolean;
-  @Input() open = new EventEmitter();
+  @Output() openMenu = new EventEmitter();
 }
