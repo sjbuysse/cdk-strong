@@ -6,9 +6,17 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
 @Component({
   selector: 'sb-track-list',
   template: `
-    <pre>
-      {{tracks|json}}
-    </pre>
+    <table mat-table [dataSource]="tracks">
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Title</th>
+        <td mat-cell *matCellDef="let element"> {{element?.name}}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnsToDisplay;">
+      </tr>
+    </table>
+    <div class="no-results" *ngIf="tracks?.length === 0 || tracks === null">No results found</div>
+
   `,
   // no onpush, doesnt work with the drag and drop from cdk
   styleUrls: ['./track-list.component.scss']
@@ -23,7 +31,7 @@ export class TrackListComponent {
   @Output() addToPlaylist = new EventEmitter<{ playlistId: string, uri: string }>();
   @Output() removeFromPlaylist = new EventEmitter<string>();
   @Output() reorder = new EventEmitter<{ currentIndex: number, newIndex: number, uri: string }>();
-  columnsToDisplay = ['play', 'artist', 'title', 'album', 'options'];
+  columnsToDisplay = ['title'];
 
   getArtists(track: TrackObjectFull): string {
     return track && track.artists && track.artists.map(v => v.name).join(', ');
