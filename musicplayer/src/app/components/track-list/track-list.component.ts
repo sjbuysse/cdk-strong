@@ -6,13 +6,24 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
 @Component({
   selector: 'sb-track-list',
   template: `
-    <table mat-table [dataSource]="tracks">
+    <table mat-table [dataSource]="tracks"
+           [dataSource]="tracks" cdkDropList (cdkDropListDropped)="drop($event)">
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Title</th>
         <td mat-cell *matCellDef="let element"> {{element?.name}}</td>
       </ng-container>
+      <ng-container matColumnDef="artists">
+        <th mat-header-cell *matHeaderCellDef>Artists</th>
+        <td mat-cell *matCellDef="let element"> {{getArtists(element)}}</td>
+      </ng-container>
+      <ng-container matColumnDef="album">
+        <th mat-header-cell *matHeaderCellDef>Album</th>
+        <td mat-cell *matCellDef="let element"> {{element?.album?.name}}</td>
+      </ng-container>
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
-      <tr mat-row *matRowDef="let row; columns: columnsToDisplay;">
+      <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"  cdkDrag [cdkDragData]="row">
+        <div *cdkDragPreview class="drag-preview">{{getArtists(row)}} - {{row?.name}}</div>
+        <td colspan="5" class="drag-placeholder" *cdkDragPlaceholder></td>
       </tr>
     </table>
     <div class="no-results" *ngIf="tracks?.length === 0 || tracks === null">No results found</div>
@@ -31,7 +42,7 @@ export class TrackListComponent {
   @Output() addToPlaylist = new EventEmitter<{ playlistId: string, uri: string }>();
   @Output() removeFromPlaylist = new EventEmitter<string>();
   @Output() reorder = new EventEmitter<{ currentIndex: number, newIndex: number, uri: string }>();
-  columnsToDisplay = ['title'];
+  columnsToDisplay = ['title', 'artists', 'album'];
 
   getArtists(track: TrackObjectFull): string {
     return track && track.artists && track.artists.map(v => v.name).join(', ');
