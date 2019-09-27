@@ -34,7 +34,7 @@ export class SearchComponent {
   results$ = this.term$.pipe(
     debounceTime(200),
     switchMap(v => this.spotifyService.search(v))
-  )
+  );
   track$ = this.musicPlayerService.currentTrack$;
 
   constructor(

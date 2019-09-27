@@ -4,6 +4,7 @@ import {PlaylistComponent} from './containers/playlist/playlist.component';
 import {CreatePlaylistComponent} from './containers/create-playlist/create-playlist.component';
 import {UnauthorizedComponent} from './containers/unauthorized/unauthorized.component';
 import {SearchComponent} from './containers/search/search.component';
+import { SearchPlaylistsComponent } from './containers/search-playlists/search-playlists.component';
 
 
 const routes: Routes = [
@@ -22,6 +23,10 @@ const routes: Routes = [
   {
     path: 'playlists/create',
     component: CreatePlaylistComponent
+  },
+  {
+    path: 'playlists/search',
+    component: SearchPlaylistsComponent
   },
   {
     path: 'playlists/:id',

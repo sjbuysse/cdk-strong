@@ -41,11 +41,10 @@ import {map} from 'rxjs/operators';
         <mat-icon>speaker</mat-icon>
         <mat-slider
           [value]="volume" [min]="0" [max]="1" [step]="0.1"
-          (valueChange)="updateVolume.emit($event)"
+          (input)="updateVolume.emit($event.value)"
         ></mat-slider>
       </ng-container>
     </div>
-
   `,
   styleUrls: ['./music-player.component.scss']
 })

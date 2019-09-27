@@ -2,11 +2,13 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
 import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { merge, Subject } from 'rxjs';
+import { filter, takeUntil, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'sb-track-list',
-  template: `
-
+  template: `    
     <table mat-table
            [cdkDropListData]="tracks"
            [dataSource]="tracks" cdkDropList (cdkDropListDropped)="drop($event)">
@@ -33,6 +35,11 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
       <ng-container matColumnDef="album">
         <th mat-header-cell *matHeaderCellDef>Album</th>
         <td mat-cell *matCellDef="let element"> {{element?.album?.name}}</td>
+      </ng-container>
+      
+      <ng-container matColumnDef="albumImage">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element" class="cell"> <img [src]="element?.album?.images[0].url" alt="album image"></td>
       </ng-container>
       <ng-container matColumnDef="options">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -98,7 +105,28 @@ export class TrackListComponent {
   @Output() addToPlaylist = new EventEmitter<{ playlistId: string, uri: string }>();
   @Output() removeFromPlaylist = new EventEmitter<string>();
   @Output() reorder = new EventEmitter<{ currentIndex: number, newIndex: number, uri: string }>();
-  columnsToDisplay = ['play', 'artist', 'title', 'album', 'options'];
+  webColumns = ['play', 'artist', 'title', 'album', 'albumImage', 'options'];
+  tabletColumns = ['play', 'artist', 'title', 'album', 'options'];
+  phoneColumns =  ['play', 'artist', 'title', 'options'];
+  columnsToDisplay = this.webColumns;
+
+  stop$ = new Subject();
+
+  constructor(private breakPointObserver: BreakpointObserver) {
+  }
+
+  ngOnInit() {
+    merge(
+      this.breakPointObserver.observe([Breakpoints.Web]).pipe(filter((x) => x.matches), tap(_ => this.columnsToDisplay = this.webColumns)),
+      this.breakPointObserver.observe([Breakpoints.Tablet]).pipe(filter((x) => x.matches), tap(_ => this.columnsToDisplay = this.tabletColumns)),
+      this.breakPointObserver.observe([Breakpoints.Handset]).pipe(filter((x) => x.matches), tap(_ => this.columnsToDisplay = this.phoneColumns)),
+    ).pipe(takeUntil(this.stop$))
+      .subscribe();
+  }
+
+  ngOnDestroy() {
+    this.stop$.next();
+  }
 
   getArtists(track: TrackObjectFull): string {
     return track && track.artists && track.artists.map(v => v.name).join(', ');
@@ -106,6 +134,12 @@ export class TrackListComponent {
 
   drop(event: CdkDragDrop<string[]>): void {
     this.reorder.emit({currentIndex: event.previousIndex, newIndex: event.currentIndex, uri: event.item.data.uri});
+  }
+
+  ngOnChanges() {
+    if(this.tracks) {
+      console.log('tracks', this.tracks);
+    }
   }
 
   openInSpotify(uri: string): void {

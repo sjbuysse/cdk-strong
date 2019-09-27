@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SpotifyService } from '../../services/spotify.service';
+import { first } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'sb-unauthorized',
@@ -14,9 +16,21 @@ import { SpotifyService } from '../../services/spotify.service';
   `,
   styleUrls: ['./unauthorized.component.scss']
 })
-export class UnauthorizedComponent {
+export class UnauthorizedComponent implements OnInit {
 
-  constructor(private spotifyService: SpotifyService) {
+  constructor(private spotifyService: SpotifyService,
+              private router: Router) {
+  }
+
+  ngOnInit() {
+    this.spotifyService.isAuthorized().pipe(
+      first()
+    ).subscribe(isLoggedIn => {
+      console.log('isloggedIn', isLoggedIn)
+      if (isLoggedIn) {
+        this.router.navigate(['/']);
+      }
+    })
   }
 
   authorize(): void {

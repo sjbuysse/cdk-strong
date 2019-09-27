@@ -12,7 +12,7 @@ import {
   MatDividerModule,
   MatFormFieldModule,
   MatIconModule,
-  MatInputModule,
+  MatInputModule, MatListModule,
   MatMenuModule,
   MatProgressBarModule,
   MatSidenavModule, MatSliderModule, MatSnackBarModule,
@@ -28,6 +28,8 @@ import {MusicPlayerComponent} from './components/music-player/music-player.compo
 import {UnauthorizedComponent} from './containers/unauthorized/unauthorized.component';
 import {SearchComponent} from './containers/search/search.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { SearchPlaylistsComponent } from './containers/search-playlists/search-playlists.component';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 @NgModule({
   declarations: [
@@ -38,7 +40,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
     CreatePlaylistComponent,
     MusicPlayerComponent,
     UnauthorizedComponent,
-    SearchComponent
+    SearchComponent,
+    SearchPlaylistsComponent
   ],
   imports: [
     BrowserAnimationsModule,
@@ -59,6 +62,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
     MatChipsModule,
     MatBadgeModule,
     MatSnackBarModule,
+    MatListModule,
+    ScrollingModule,
     ReactiveFormsModule,
     MatSliderModule,
     FormsModule

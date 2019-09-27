@@ -1,14 +1,15 @@
-import {Component} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {SpotifyService} from './services/spotify.service';
 import {Router} from '@angular/router';
 import {MusicPlayerService} from './services/music-player.service';
+import { MediaMatcher } from '@angular/cdk/layout';
 
 @Component({
   selector: 'sb-root',
   template: `
     <ng-container *ngIf="isAuthorized$|async; else unauthorized">
       <mat-sidenav-container class="sidenav">
-        <mat-sidenav mode="side" [opened]="menuOpen">
+        <mat-sidenav [mode]="mobileQuery.matches ? 'over' : 'side'" [opened]="menuOpen">
           <sb-sidebar
             [playlists]="playlists$|async"
             [me]="me$|async"
@@ -46,8 +47,10 @@ import {MusicPlayerService} from './services/music-player.service';
   `,
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   menuOpen = true;
+  mobileQuery: MediaQueryList;
+
   playlists$ = this.spotifyService.playlists$;
   isAuthorized$ = this.spotifyService.isAuthorized();
   me$ = this.spotifyService.me$;
@@ -61,12 +64,18 @@ export class AppComponent {
   constructor(
     private spotifyService: SpotifyService,
     private musicPlayerService: MusicPlayerService,
-    private router: Router) {
+    private router: Router,
+    private media: MediaMatcher) {
+  }
+
+  ngOnInit() {
     this.isAuthorized$.subscribe(res => {
       if (res === false) {
         this.router.navigate(['unauthorized']);
       }
     });
+
+    this.mobileQuery = this.media.matchMedia('(max-width: 600px)');
   }
 
   onLogout(): void {

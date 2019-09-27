@@ -23,6 +23,10 @@ import CurrentUsersProfileResponse = SpotifyApi.CurrentUsersProfileResponse;
       <mat-icon>playlist_play</mat-icon>
       <span>Playlists</span>
     </button>
+    <button mat-menu-item routerLink="/playlists/search">
+      <mat-icon>find_in_page</mat-icon>
+      <span>Search playlists</span>
+    </button>
     <mat-menu #playlistsMenu="matMenu">
       <button mat-menu-item [routerLink]="['playlists', 'create']">
         <mat-icon>playlist_add</mat-icon>

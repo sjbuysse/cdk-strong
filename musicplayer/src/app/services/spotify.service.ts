@@ -1,17 +1,18 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, NEVER, Observable, ReplaySubject} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, NEVER, Observable, ReplaySubject } from 'rxjs';
 import * as SpotifyWebApi from 'spotify-web-api-js';
-import {fromPromise} from 'rxjs/internal-compatibility';
-import {catchError, filter, map, mergeMap, shareReplay, switchMap, tap} from 'rxjs/operators';
+import { fromPromise } from 'rxjs/internal-compatibility';
+import { catchError, filter, map, mergeMap, shareReplay, switchMap, tap } from 'rxjs/operators';
 import * as settings from '../../../spotify-credentials.json';
+import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material';
 import SinglePlaylistResponse = SpotifyApi.SinglePlaylistResponse;
 import CurrentlyPlayingResponse = SpotifyApi.CurrentlyPlayingResponse;
 import CreatePlaylistResponse = SpotifyApi.CreatePlaylistResponse;
 import TrackSearchResponse = SpotifyApi.TrackSearchResponse;
-import {Router} from '@angular/router';
-import {MatSnackBar} from '@angular/material';
 import AddTracksToPlaylistResponse = SpotifyApi.AddTracksToPlaylistResponse;
-import TrackObjectFull = SpotifyApi.TrackObjectFull;
+import PlaylistSearchResponse = SpotifyApi.PlaylistSearchResponse;
+import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
 
 @Injectable({
   providedIn: 'root'
@@ -69,7 +70,6 @@ export class SpotifyService {
       this.handleRequest(this.spotify.getMe()).subscribe((me: SpotifyApi.CurrentUsersProfileResponse) => {
         this.me$.next(me);
       });
-
     }
   }
 
@@ -117,6 +117,13 @@ export class SpotifyService {
 
   search(term: string): Observable<TrackSearchResponse> {
     return this.handleRequest(this.spotify.searchTracks(term));
+  }
+
+  searchPlaylists(term: string, offset = 0): Observable<PlaylistObjectSimplified[]> {
+    console.log('fetching');
+    return this.handleRequest(this.spotify.searchPlaylists(term, {offset})).pipe(
+      map((response: PlaylistSearchResponse) => response.playlists.items)
+    );
   }
 
   addToPlaylist(uri: any, playlistId: any): Observable<AddTracksToPlaylistResponse> {
