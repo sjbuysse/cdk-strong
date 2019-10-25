@@ -1,5 +1,5 @@
 table {
-  width: 100%;
+  width: calc(100% - 300px);
 }
 
 .drag-placeholder {
@@ -28,6 +28,7 @@ tr:hover {
   padding: 5px 10px;
 }
 .no-results {
+  width: calc(100% - 300px);
   padding: 10px;
   text-align:center;
 }

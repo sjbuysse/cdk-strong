@@ -1,5 +1,5 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
 import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
 
@@ -20,8 +20,30 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
         <th mat-header-cell *matHeaderCellDef>Album</th>
         <td mat-cell *matCellDef="let element"> {{element?.album?.name}}</td>
       </ng-container>
+      <ng-container matColumnDef="options">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button [matMenuTriggerFor]="trackMenu" class="more-action">
+            <mat-icon>more_horiz</mat-icon>
+          </button>
+          <mat-menu #trackMenu="matMenu">
+            <button mat-menu-item (click)="openInSpotify(element.uri)">
+              <mat-icon>play_circle_filled</mat-icon>
+              <span>Open in spotify</span>
+            </button>
+            <button *ngIf="!searchMode" mat-menu-item (click)="removeFromPlaylist.emit(element.uri)">
+              <mat-icon>remove_from_queue</mat-icon>
+              <span>Remove from playlist</span>
+            </button>
+            <button mat-menu-item>
+              <mat-icon>share</mat-icon>
+              <span>Share</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
-      <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"  cdkDrag [cdkDragData]="row">
+      <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" cdkDrag [cdkDragData]="row">
         <div *cdkDragPreview class="drag-preview">{{getArtists(row)}} - {{row?.name}}</div>
         <td colspan="5" class="drag-placeholder" *cdkDragPlaceholder></td>
       </tr>
@@ -32,7 +54,7 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
   // no onpush, doesnt work with the drag and drop from cdk
   styleUrls: ['./track-list.component.scss']
 })
-export class TrackListComponent {
+export class TrackListComponent implements OnInit {
   @Input() currentlyPlaying: TrackObjectFull;
   @Input() playlists: PlaylistObjectSimplified[];
   @Input() searchMode: boolean;
@@ -49,10 +71,16 @@ export class TrackListComponent {
   }
 
   drop(event: CdkDragDrop<string[]>): void {
-    this.reorder.emit({currentIndex: event.previousIndex, newIndex: event.currentIndex, uri: event.item.data.uri});
+    this.reorder.emit({ currentIndex: event.previousIndex, newIndex: event.currentIndex, uri: event.item.data.uri });
   }
 
   openInSpotify(uri: string): void {
     window.open(uri);
+  }
+
+  ngOnInit() {
+    if (this.searchMode) {
+      this.columnsToDisplay = [...this.columnsToDisplay, 'options'];
+    }
   }
 }
