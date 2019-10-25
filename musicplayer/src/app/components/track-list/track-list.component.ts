@@ -27,6 +27,10 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
             <mat-icon>more_horiz</mat-icon>
           </button>
           <mat-menu #trackMenu="matMenu">
+            <button mat-menu-item [matMenuTriggerFor]="playlistsMenu">
+              <mat-icon>add_to_queue</mat-icon>
+              <span>Add to playlist</span>
+            </button>
             <button mat-menu-item (click)="openInSpotify(element.uri)">
               <mat-icon>play_circle_filled</mat-icon>
               <span>Open in spotify</span>
@@ -39,6 +43,15 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
               <mat-icon>share</mat-icon>
               <span>Share</span>
             </button>
+          </mat-menu>
+          <mat-menu #playlistsMenu="matMenu">
+            <ng-container *ngFor="let playlist of playlists">
+              <button mat-menu-item (click)="addToPlaylist.emit({playlistId: playlist?.id, uri: element.uri})">
+                <mat-icon>add</mat-icon>
+                <span>{{playlist?.name}}</span>
+                <span> ({{playlist?.tracks?.total}})</span>
+              </button>
+            </ng-container>
           </mat-menu>
         </td>
       </ng-container>
