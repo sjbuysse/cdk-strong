@@ -1,0 +1,8 @@
+@mixin sidebar-component-theme($theme) {
+
+  $primary: map-get($theme, primary);
+
+  mat-card.themed {
+    background-color: mat-color($primary);
+  }
+}

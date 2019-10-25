@@ -5,7 +5,7 @@ import CurrentUsersProfileResponse = SpotifyApi.CurrentUsersProfileResponse;
 @Component({
   selector: 'sb-sidebar',
   template: `
-    <mat-card>
+    <mat-card class="themed">
       <mat-card-header>
         <img mat-card-avatar [attr.src]="me?.images && me?.images[0]?.url" alt="">
         <span mat-card-title>Hi {{me?.display_name}}</span>
