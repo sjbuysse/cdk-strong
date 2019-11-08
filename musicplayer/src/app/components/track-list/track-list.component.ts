@@ -8,6 +8,15 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
   template: `
     <table mat-table [dataSource]="tracks"
            [dataSource]="tracks" cdkDropList (cdkDropListDropped)="drop($event)">
+      <ng-container matColumnDef="play">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element">
+          <button *ngIf="currentlyPlaying?.id !== element?.id"mat-mini-fab class="play-action" (click)="playTrack.emit(element)">
+            <mat-icon>play_arrow</mat-icon>
+          </button>
+          <mat-icon *ngIf="currentlyPlaying?.id === element?.id">volume_up</mat-icon>
+        </td>
+      </ng-container>
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Title</th>
         <td mat-cell *matCellDef="let element"> {{element?.name}}</td>
@@ -77,7 +86,7 @@ export class TrackListComponent implements OnInit {
   @Output() addToPlaylist = new EventEmitter<{ playlistId: string, uri: string }>();
   @Output() removeFromPlaylist = new EventEmitter<string>();
   @Output() reorder = new EventEmitter<{ currentIndex: number, newIndex: number, uri: string }>();
-  columnsToDisplay = ['title', 'artists', 'album'];
+  columnsToDisplay = ['play', 'title', 'artists', 'album'];
 
   getArtists(track: TrackObjectFull): string {
     return track && track.artists && track.artists.map(v => v.name).join(', ');

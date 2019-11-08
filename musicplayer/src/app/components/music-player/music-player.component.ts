@@ -1,12 +1,57 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { combineLatest, ReplaySubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
-import {combineLatest, ReplaySubject} from 'rxjs';
-import {map} from 'rxjs/operators';
 
 @Component({
   selector: 'sb-music-player',
   template: `
-
+    <div class="left">
+      <mat-card *ngIf="currentTrack">
+        <!-- replace div with mat-card-header and use mat-card-avatar, mat-card-title and mat-card-subtitle -->
+        <div>
+          <img [attr.src]="getImage(currentTrack)" alt="">
+          <div>{{currentTrack?.name}}</div>
+          <div>{{getArtists(currentTrack)}}</div>
+        </div>
+      </mat-card>
+    </div>
+    <div class="middle">
+      <div class="button-wrapper">
+        <!-- use mat-icon-button directive with the following mat-icon components:
+         skip_previous
+         play_circle_filled
+         pause_circle_filled
+         skip_next
+        -->
+        <button [disabled]="!currentTrack" (click)="previous.emit()">
+          <span>skip_previous</span>
+        </button>
+        <button *ngIf="!playing" (click)="playStart.emit()" [disabled]="!currentTrack">
+          <span>play_circle_filled</span>
+        </button>
+        <button *ngIf="playing" (click)="pauseStart.emit()" [disabled]="!currentTrack">
+          <span>pause_circle_filled</span>
+        </button>
+        <button [disabled]="!currentTrack" (click)="next.emit()">
+          <span>skip_next</span>
+        </button>
+      </div>
+      <div class="progress-wrapper" *ngIf="currentTrack">
+        <span>{{timeStr}}</span>
+        <!-- add a mat-progress-bar with color set to accent, mode to determinate
+        and bind the value input to the progress$ with the async pipe -->
+        <span>{{durationStr}}</span>
+      </div>
+    </div>
+    <div class="right">
+      <ng-container *ngIf="currentTrack">
+        <mat-icon>speaker</mat-icon>
+        <!-- use the mat-slide component (min value is 0, max value is 1 and the steps are 0.10)
+        if the value changes, emit to the updateVolume eventemitter
+        -->
+      </ng-container>
+    </div>
   `,
   styleUrls: ['./music-player.component.scss']
 })
