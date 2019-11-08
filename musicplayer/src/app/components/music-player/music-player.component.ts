@@ -8,48 +8,41 @@ import TrackObjectFull = SpotifyApi.TrackObjectFull;
   template: `
     <div class="left">
       <mat-card *ngIf="currentTrack">
-        <!-- replace div with mat-card-header and use mat-card-avatar, mat-card-title and mat-card-subtitle -->
-        <div>
-          <img [attr.src]="getImage(currentTrack)" alt="">
-          <div>{{currentTrack?.name}}</div>
-          <div>{{getArtists(currentTrack)}}</div>
-        </div>
+        <mat-card-header>
+          <img [attr.src]="getImage(currentTrack)" mat-card-avatar alt="">
+          <mat-card-title>{{currentTrack?.name}}</mat-card-title>
+          <mat-card-subtitle>{{getArtists(currentTrack)}}</mat-card-subtitle>
+        </mat-card-header>
       </mat-card>
     </div>
     <div class="middle">
       <div class="button-wrapper">
-        <!-- use mat-icon-button directive with the following mat-icon components:
-         skip_previous
-         play_circle_filled
-         pause_circle_filled
-         skip_next
-        -->
-        <button [disabled]="!currentTrack" (click)="previous.emit()">
-          <span>skip_previous</span>
+        <button mat-icon-button [disabled]="!currentTrack" (click)="previous.emit()">
+          <mat-icon>skip_previous</mat-icon>
         </button>
-        <button *ngIf="!playing" (click)="playStart.emit()" [disabled]="!currentTrack">
-          <span>play_circle_filled</span>
+        <button mat-icon-button *ngIf="!playing" (click)="playStart.emit()" [disabled]="!currentTrack">
+          <mat-icon>play_circle_filled</mat-icon>
         </button>
-        <button *ngIf="playing" (click)="pauseStart.emit()" [disabled]="!currentTrack">
-          <span>pause_circle_filled</span>
+        <button mat-icon-button *ngIf="playing" (click)="pauseStart.emit()" [disabled]="!currentTrack">
+          <mat-icon>pause_circle_filled</mat-icon>
         </button>
-        <button [disabled]="!currentTrack" (click)="next.emit()">
-          <span>skip_next</span>
+        <button mat-icon-button [disabled]="!currentTrack" (click)="next.emit()">
+          <mat-icon>skip_next</mat-icon>
         </button>
       </div>
       <div class="progress-wrapper" *ngIf="currentTrack">
         <span>{{timeStr}}</span>
-        <!-- add a mat-progress-bar with color set to accent, mode to determinate
-        and bind the value input to the progress$ with the async pipe -->
+        <mat-progress-bar color="accent" mode="determinate" [value]="progress$|async"></mat-progress-bar>
         <span>{{durationStr}}</span>
       </div>
     </div>
     <div class="right">
       <ng-container *ngIf="currentTrack">
         <mat-icon>speaker</mat-icon>
-        <!-- use the mat-slide component (min value is 0, max value is 1 and the steps are 0.10)
-        if the value changes, emit to the updateVolume eventemitter
-        -->
+        <mat-slider
+          [value]="volume" [min]="0" [max]="1" [step]="0.1"
+          (valueChange)="updateVolume.emit($event)"
+        ></mat-slider>
       </ng-container>
     </div>
   `,
