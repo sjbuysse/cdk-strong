@@ -1,11 +1,12 @@
-import {Component, OnDestroy} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {map, mapTo, mergeMap, switchMap} from 'rxjs/operators';
-import {SpotifyService} from '../../services/spotify.service';
-import {BehaviorSubject, Subject} from 'rxjs';
-import {MatSnackBar} from '@angular/material';
+import { Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { map, mapTo, mergeMap, switchMap } from 'rxjs/operators';
+import { SpotifyService } from '../../services/spotify.service';
+import { BehaviorSubject, of, Subject } from 'rxjs';
+import { MatSnackBar } from '@angular/material';
+import { MusicPlayerService } from '../../services/music-player.service';
+import { ModalService } from '../../services/modal.service';
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
-import {MusicPlayerService} from '../../services/music-player.service';
 
 @Component({
   selector: 'sb-playlist',
@@ -15,6 +16,9 @@ import {MusicPlayerService} from '../../services/music-player.service';
         <img *ngIf="playlist?.images?.length > 0" [attr.src]="playlist?.images[0]?.url" class="img-small">
         <mat-icon *ngIf="playlist?.images?.length === 0">playlist_play</mat-icon>
         <span>Playlist: {{playlist?.name}}</span>
+        <button mat-icon-button (click)="openDeleteModal()">
+          <mat-icon>delete</mat-icon>
+        </button>
       </mat-toolbar>
       <sb-track-list
         [currentlyPlaying]="track$|async"
@@ -45,7 +49,8 @@ export class PlaylistComponent implements OnDestroy {
   constructor(private activatedRoute: ActivatedRoute,
               private spotifyService: SpotifyService,
               private musicPlayerService: MusicPlayerService,
-              private matSnackBar: MatSnackBar) {
+              private matSnackBar: MatSnackBar,
+              private modalService: ModalService) {
     this.tracks$.subscribe(tracks => this.musicPlayerService.setTrackList(tracks));
   }
 
@@ -65,10 +70,17 @@ export class PlaylistComponent implements OnDestroy {
     this.destroy$.next();
   }
 
-  reorderTracks({currentIndex, newIndex}): void {
+  reorderTracks({ currentIndex, newIndex }): void {
     this.spotifyService.reorderTracks(currentIndex, newIndex, this.activatedRoute.snapshot.params.id).subscribe(resp => {
       this.trigger$.next(true);
       this.matSnackBar.open('Order succesfully updated');
     });
+  }
+
+  openDeleteModal(): void {
+    const ref = this.modalService.openConfirmModal('Sure?', 'Are you sure you want to delete this playlist?');
+    ref.instance.approve.pipe(
+      mergeMap(() => of('success')) // not supported by api
+    );
   }
 }
