@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
 import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
@@ -76,7 +76,7 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
   // no onpush, doesnt work with the drag and drop from cdk
   styleUrls: ['./track-list.component.scss']
 })
-export class TrackListComponent implements OnInit {
+export class TrackListComponent {
   @Input() currentlyPlaying: TrackObjectFull;
   @Input() playlists: PlaylistObjectSimplified[];
   @Input() searchMode: boolean;
@@ -98,11 +98,5 @@ export class TrackListComponent implements OnInit {
 
   openInSpotify(uri: string): void {
     window.open(uri);
-  }
-
-  ngOnInit() {
-    if (this.searchMode) {
-      this.columnsToDisplay = [...this.columnsToDisplay, 'options'];
-    }
   }
 }
