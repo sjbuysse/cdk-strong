@@ -15,15 +15,37 @@ import { Overlay } from '@angular/cdk/overlay';
   `
 })
 export class ModalComponent implements OnDestroy, AfterViewInit {
+  @ViewChild(CdkPortal, { static: false }) portal;
   @Input() headerLabel: string;
   @Output() destroy = new EventEmitter();
+
+  positionStrategy = this.overlay.position()
+    .global()
+    .centerHorizontally()
+    .centerVertically();
+
+  overlayConfig = {
+    maxHeight: '400px',
+    height: 'auto',
+    width: '600px',
+    hasBackdrop: true,
+    scrollStrategy: this.overlay.scrollStrategies.block(),
+    positionStrategy: this.positionStrategy
+  };
+
+  overlayRef = this.overlay.create(this.overlayConfig);
 
   constructor(private overlay: Overlay) {
   }
 
   ngOnDestroy(): void {
+    this.destroy.emit();
+    this.overlayRef.detach();
+    this.overlayRef.dispose();
   }
 
   ngAfterViewInit(): void {
+    this.overlayRef.attach(this.portal);
   }
+
 }
