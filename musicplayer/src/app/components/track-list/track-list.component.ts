@@ -1,5 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { merge } from 'rxjs';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { filter, map } from 'rxjs/operators';
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
 import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
 
@@ -7,11 +10,12 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
   selector: 'sb-track-list',
   template: `
     <table mat-table [dataSource]="tracks"
+           *ngIf="columnsToDisplay$ |async as columnsToDisplay"
            [dataSource]="tracks" cdkDropList (cdkDropListDropped)="drop($event)">
       <ng-container matColumnDef="play">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element">
-          <button *ngIf="currentlyPlaying?.id !== element?.id"mat-mini-fab class="play-action" (click)="playTrack.emit(element)">
+          <button *ngIf="currentlyPlaying?.id !== element?.id" mat-mini-fab class="play-action" (click)="playTrack.emit(element)">
             <mat-icon>play_arrow</mat-icon>
           </button>
           <mat-icon *ngIf="currentlyPlaying?.id === element?.id">volume_up</mat-icon>
@@ -76,7 +80,7 @@ import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
   // no onpush, doesnt work with the drag and drop from cdk
   styleUrls: ['./track-list.component.scss']
 })
-export class TrackListComponent implements OnInit {
+export class TrackListComponent {
   @Input() currentlyPlaying: TrackObjectFull;
   @Input() playlists: PlaylistObjectSimplified[];
   @Input() searchMode: boolean;
@@ -86,7 +90,21 @@ export class TrackListComponent implements OnInit {
   @Output() addToPlaylist = new EventEmitter<{ playlistId: string, uri: string }>();
   @Output() removeFromPlaylist = new EventEmitter<string>();
   @Output() reorder = new EventEmitter<{ currentIndex: number, newIndex: number, uri: string }>();
-  columnsToDisplay = ['play', 'title', 'artists', 'album'];
+  webColumns = ['play', 'artists', 'album', 'title', 'options'];
+  tabletColumns = ['play', 'artists', 'title', 'options'];
+  phoneColumns = ['play', 'title', 'options'];
+  columnsToDisplay$ = merge(
+    this.breakPointObserver.observe([Breakpoints.Web])
+      .pipe(filter((x) => x.matches), map(() => this.webColumns)),
+    this.breakPointObserver.observe([Breakpoints.Tablet])
+      .pipe(filter((x) => x.matches), map(() => this.tabletColumns)),
+    this.breakPointObserver.observe([Breakpoints.Handset])
+      .pipe(filter((x) => x.matches), map(() => this.phoneColumns)),
+  );
+
+  constructor(private breakPointObserver: BreakpointObserver) {
+  }
+
 
   getArtists(track: TrackObjectFull): string {
     return track && track.artists && track.artists.map(v => v.name).join(', ');
@@ -98,11 +116,5 @@ export class TrackListComponent implements OnInit {
 
   openInSpotify(uri: string): void {
     window.open(uri);
-  }
-
-  ngOnInit() {
-    if (this.searchMode) {
-      this.columnsToDisplay = [...this.columnsToDisplay, 'options'];
-    }
   }
 }
