@@ -133,13 +133,6 @@ export class SpotifyService {
       );
   }
 
-  removePlaylist(id: any) {
-    return this.handleRequest(this.spotify.removeTracksFromPlaylist(id, [uri]))
-      .pipe(
-        tap(() => this.refreshTrigger$.next(true)) // reload
-      );
-  }
-
   reorderTracks(currentIndex: number, newIndex: number, playlistId: string) {
     return this.handleRequest(this.spotify.reorderTracksInPlaylist(playlistId, currentIndex, newIndex));
   }
