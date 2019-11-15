@@ -1,16 +1,17 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { merge } from 'rxjs';
+import { filter, map, startWith } from 'rxjs/operators';
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
 import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { merge, Subject } from 'rxjs';
-import { filter, takeUntil, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'sb-track-list',
-  template: `    
+  template: `
     <table mat-table
            [cdkDropListData]="tracks"
+           *ngIf="columnsToDisplay$|async as columnsToDisplay"
            [dataSource]="tracks" cdkDropList (cdkDropListDropped)="drop($event)">
       <ng-container matColumnDef="artist">
         <th mat-header-cell *matHeaderCellDef>Artist</th>
@@ -20,7 +21,7 @@ import { filter, takeUntil, tap } from 'rxjs/operators';
       <ng-container matColumnDef="play">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element">
-          <button *ngIf="currentlyPlaying?.id !== element?.id"mat-mini-fab class="play-action" (click)="playTrack.emit(element)">
+          <button *ngIf="currentlyPlaying?.id !== element?.id" mat-mini-fab class="play-action" (click)="playTrack.emit(element)">
             <mat-icon>play_arrow</mat-icon>
           </button>
           <mat-icon *ngIf="currentlyPlaying?.id === element?.id">volume_up</mat-icon>
@@ -36,10 +37,10 @@ import { filter, takeUntil, tap } from 'rxjs/operators';
         <th mat-header-cell *matHeaderCellDef>Album</th>
         <td mat-cell *matCellDef="let element"> {{element?.album?.name}}</td>
       </ng-container>
-      
+
       <ng-container matColumnDef="albumImage">
         <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let element" class="cell"> <img [src]="element?.album?.images[0].url" alt="album image"></td>
+        <td mat-cell *matCellDef="let element" class="cell"><img [src]="element?.album?.images[0].url" alt="album image"></td>
       </ng-container>
       <ng-container matColumnDef="options">
         <th mat-header-cell *matHeaderCellDef></th>
@@ -91,6 +92,7 @@ import { filter, takeUntil, tap } from 'rxjs/operators';
       </ng-template>
     </table>
     <div class="no-results" *ngIf="tracks?.length === 0 || tracks === null">No results found</div>
+    {{columnsToDisplay$|async|json}}
   `,
   // no onpush, doesnt work with the drag and drop from cdk
   styleUrls: ['./track-list.component.scss']
@@ -107,25 +109,17 @@ export class TrackListComponent {
   @Output() reorder = new EventEmitter<{ currentIndex: number, newIndex: number, uri: string }>();
   webColumns = ['play', 'artist', 'title', 'album', 'albumImage', 'options'];
   tabletColumns = ['play', 'artist', 'title', 'album', 'options'];
-  phoneColumns =  ['play', 'artist', 'title', 'options'];
-  columnsToDisplay = this.webColumns;
-
-  stop$ = new Subject();
+  phoneColumns = ['play', 'artist', 'title', 'options'];
+  columnsToDisplay$ = merge(
+    this.breakPointObserver.observe([Breakpoints.Web])
+      .pipe(filter((x) => x.matches), map(() => this.webColumns)),
+    this.breakPointObserver.observe([Breakpoints.Tablet])
+      .pipe(filter((x) => x.matches), map(() => this.tabletColumns)),
+    this.breakPointObserver.observe([Breakpoints.Handset])
+      .pipe(filter((x) => x.matches), map(() => this.phoneColumns)),
+  );
 
   constructor(private breakPointObserver: BreakpointObserver) {
-  }
-
-  ngOnInit() {
-    merge(
-      this.breakPointObserver.observe([Breakpoints.Web]).pipe(filter((x) => x.matches), tap(_ => this.columnsToDisplay = this.webColumns)),
-      this.breakPointObserver.observe([Breakpoints.Tablet]).pipe(filter((x) => x.matches), tap(_ => this.columnsToDisplay = this.tabletColumns)),
-      this.breakPointObserver.observe([Breakpoints.Handset]).pipe(filter((x) => x.matches), tap(_ => this.columnsToDisplay = this.phoneColumns)),
-    ).pipe(takeUntil(this.stop$))
-      .subscribe();
-  }
-
-  ngOnDestroy() {
-    this.stop$.next();
   }
 
   getArtists(track: TrackObjectFull): string {
@@ -133,13 +127,7 @@ export class TrackListComponent {
   }
 
   drop(event: CdkDragDrop<string[]>): void {
-    this.reorder.emit({currentIndex: event.previousIndex, newIndex: event.currentIndex, uri: event.item.data.uri});
-  }
-
-  ngOnChanges() {
-    if(this.tracks) {
-      console.log('tracks', this.tracks);
-    }
+    this.reorder.emit({ currentIndex: event.previousIndex, newIndex: event.currentIndex, uri: event.item.data.uri });
   }
 
   openInSpotify(uri: string): void {
