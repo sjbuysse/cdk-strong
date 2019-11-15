@@ -8,10 +8,10 @@ import TrackObjectFull = SpotifyApi.TrackObjectFull;
   template: `
     <div class="left">
       <mat-card *ngIf="currentTrack">
-        <!-- replace div with mat-card-header and use mat-card-avatar, mat-card-title and mat-card-subtitle -->
+        <!-- replace div with mat-card and use mat-card-header, mat-card-avatar, mat-card-title and mat-card-subtitle. -->
         <div>
           <img [attr.src]="getImage(currentTrack)" alt="">
-          <div>{{currentTrack?.name}}</div>
+          <div></div>
           <div>{{getArtists(currentTrack)}}</div>
         </div>
       </mat-card>
@@ -48,7 +48,7 @@ import TrackObjectFull = SpotifyApi.TrackObjectFull;
       <ng-container *ngIf="currentTrack">
         <mat-icon>speaker</mat-icon>
         <!-- use the mat-slide component (min value is 0, max value is 1 and the steps are 0.10)
-        if the value changes, emit to the updateVolume eventemitter
+        if the value changes, emit to the updateVolume eventEmitter
         -->
       </ng-container>
     </div>
