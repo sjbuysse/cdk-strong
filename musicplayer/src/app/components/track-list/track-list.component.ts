@@ -49,6 +49,7 @@ export class TrackListComponent {
   }
 
   drop(event: CdkDragDrop<string[]>): void {
+    console.log('update order:', {currentIndex: event.previousIndex, newIndex: event.currentIndex, uri: event.item.data.uri});
     this.reorder.emit({currentIndex: event.previousIndex, newIndex: event.currentIndex, uri: event.item.data.uri});
   }
 
