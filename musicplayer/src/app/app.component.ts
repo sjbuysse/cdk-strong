@@ -74,7 +74,11 @@ export class AppComponent {
     this.musicPlayerService.previous();
   }
 
+  onOpenMenu(): void {
+    // TODO: implement
+  }
+
   onCloseMenu(): void {
-    // implement
+    // TODO: implement
   }
 }
