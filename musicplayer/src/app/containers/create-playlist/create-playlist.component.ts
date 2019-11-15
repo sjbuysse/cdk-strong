@@ -6,24 +6,17 @@ import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'sb-create-playlist',
   template: `
-    <sb-modal headerLabel="Create new Playlist" (destroy)="onDestroy()">
-      <div sb-modal-body>
-        <form [formGroup]="form" (ngSubmit)="submit()">
-          <mat-form-field>
-            <input formControlName="name" matInput type="text" placeholder="Name">
-          </mat-form-field>
-          <mat-form-field>
-            <textarea formControlName="description" matInput placeholder="Description"></textarea>
-          </mat-form-field>
-          <mat-checkbox formControlName="public">Public</mat-checkbox>
-        </form>
-      </div>
-      <div sb-modal-footer>
-        <a routerLink="../../" mat-flat-button>Cancel</a>
-        <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="submit()">Create</button>
-      </div>
-    </sb-modal>
-
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field>
+        <input formControlName="name" matInput type="text" placeholder="Name">
+      </mat-form-field>
+      <mat-form-field>
+        <textarea formControlName="description" matInput placeholder="Description"></textarea>
+      </mat-form-field>
+      <mat-checkbox formControlName="public">Public</mat-checkbox>
+    </form>
+    <a routerLink="../../" mat-flat-button>Cancel</a>
+    <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="submit()">Create</button>
   `,
   styleUrls: ['./create-playlist.component.scss']
 })
