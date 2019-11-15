@@ -134,7 +134,7 @@ export class SpotifyService {
   }
 
   removePlaylist(id: any) {
-    return this.handleRequest(this.spotify.removeTracksFromPlaylist(id, [uri]))
+    return this.handleRequest(this.spotify.removeTracksFromPlaylist(id))
       .pipe(
         tap(() => this.refreshTrigger$.next(true)) // reload
       );
