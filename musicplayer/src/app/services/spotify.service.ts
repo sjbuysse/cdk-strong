@@ -12,6 +12,8 @@ import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material';
 import AddTracksToPlaylistResponse = SpotifyApi.AddTracksToPlaylistResponse;
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
+import PlaylistObjectSimplified = SpotifyApi.PlaylistObjectSimplified;
+import PlaylistSearchResponse = SpotifyApi.PlaylistSearchResponse;
 
 @Injectable({
   providedIn: 'root'
@@ -117,6 +119,12 @@ export class SpotifyService {
 
   search(term: string): Observable<TrackSearchResponse> {
     return this.handleRequest(this.spotify.searchTracks(term));
+  }
+
+  searchPlaylists(term: string, offset = 0): Observable<PlaylistObjectSimplified[]> {
+    return this.handleRequest(this.spotify.searchPlaylists(term, {offset})).pipe(
+      map((response: PlaylistSearchResponse) => response.playlists.items)
+    );
   }
 
   addToPlaylist(uri: any, playlistId: any): Observable<AddTracksToPlaylistResponse> {

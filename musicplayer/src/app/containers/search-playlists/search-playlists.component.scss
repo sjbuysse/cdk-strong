@@ -1,0 +1,43 @@
+mat-form-field {
+  width: 98%;
+}
+
+
+.playlists-list {
+  height: calc(100vh - 214px); // height topbar + player
+  margin: 15px;
+
+  .playlist-card {
+    width: 100%;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 75px;
+
+    img {
+      height: 100%;
+      margin-right: 10px;
+    }
+
+    .name {
+      width: 150px;
+      word-break: break-word;
+    }
+
+    .owner {
+      display: flex;
+      align-items: center;
+      width: 100px;
+
+      mat-icon {
+        margin-right: 5px;
+      }
+    }
+
+    .song-counter {
+      display: flex;
+      align-items: center;
+    }
+  }
+}
