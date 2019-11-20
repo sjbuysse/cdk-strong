@@ -37,6 +37,7 @@ import { ModalComponent } from './components/modal/modal.component';
 import { PortalModule } from '@angular/cdk/portal';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal.component';
+import { SearchPlaylistsComponent } from './containers/search-playlists/search-playlists.component';
 
 @NgModule({
   declarations: [
@@ -51,7 +52,8 @@ import { ConfirmModalComponent } from './components/confirm-modal/confirm-modal.
     SidebarClosedComponent,
     ModalInnerComponent,
     ModalComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    SearchPlaylistsComponent
   ],
   imports: [
     BrowserAnimationsModule,
