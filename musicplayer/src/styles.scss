@@ -8,3 +8,30 @@ body {
 .cdk-drop-list-dragging tr:hover button {
   opacity: 0!important;
 }
+
+@import '~@angular/material/theming';
+
+// always include only once per project
+@include mat-core();
+
+// import our custom theme
+@import './themes/dark-theme';
+@import './themes/nature-theme';
+
+@import 'app/components/music-player/music-player.component.theme';
+@import 'app/components/sidebar/sidebar.component.theme';
+
+@mixin custom-components-theme($theme) {
+  @include music-player-component-theme($theme);
+  @include sidebar-component-theme($theme);
+}
+
+.dark-theme {
+  @include angular-material-theme($sb-dark-theme);
+  @include custom-components-theme($sb-dark-theme);
+}
+
+.nature-theme {
+  @include angular-material-theme($sb-nature-theme);
+  @include custom-components-theme($sb-nature-theme);
+}

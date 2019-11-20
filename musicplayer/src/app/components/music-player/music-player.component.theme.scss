@@ -1,0 +1,7 @@
+@mixin music-player-component-theme($theme) {
+  $primary: map-get($theme, primary);
+
+  sb-music-player {
+    background: mat-color($primary);
+  }
+}
